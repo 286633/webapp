@@ -1,55 +1,62 @@
-let timer;
-let isRunning = false;
-let elapsedTime = 0;
-let startTime = 0;
+document.addEventListener("DOMContentLoaded", function () {
+    let timer;
+    let seconds = 0;
+    let minutes = 0;
+    let isRunning = false;
+    let startTime = null;
 
-const display = document.getElementById('display');
-const startStopButton = document.getElementById('startStopButton');
-const resetButton = document.getElementById('resetButton');
+    // Select the elements for time display and the circle button
+    const timeDisplay = document.getElementById('time-display');
+    const startStopButton = document.getElementById('startStopButton');
 
-startStopButton.addEventListener('click', toggleStartStop);
-resetButton.addEventListener('click', resetStopwatch);
-
-// Automatically start the stopwatch after 9 seconds
-window.onload = function() {
-    setTimeout(() => {
-        startStopButton.click(); // Simulate the click on "Start"
-    }, 9000); // 9 seconds = 9000 milliseconds
-};
-
-function toggleStartStop() {
-    if (isRunning) {
-        // Stop the timer
-        clearInterval(timer);
-        startStopButton.textContent = 'Start';
-        isRunning = false;
-    } else {
-        // Start the timer
-        startTime = Date.now() - elapsedTime;
-        timer = setInterval(updateTime, 100);
-        startStopButton.textContent = 'Stop';
-        isRunning = true;
+    // Function to format the time as MM:SS
+    function formatTime() {
+        const minutesFormatted = minutes < 10 ? '0' + minutes : minutes;
+        const secondsFormatted = seconds < 10 ? '0' + seconds : seconds;
+        return `${minutesFormatted}:${secondsFormatted}`;
     }
-}
 
-function updateTime() {
-    elapsedTime = Date.now() - startTime;
-    const seconds = Math.floor(elapsedTime / 1000);
-    const milliseconds = Math.floor((elapsedTime % 1000) / 100);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    display.textContent = `${formatTime(minutes)}:${formatTime(remainingSeconds)}.${milliseconds}`;
-}
+    // Update time display on the page
+    function updateTime() {
+        timeDisplay.textContent = formatTime();
+    }
 
-function formatTime(time) {
-    return time < 10 ? '0' + time : time;
-}
+    // Start the stopwatch
+    function startStopwatch() {
+        if (!isRunning) {
+            console.log('Stopwatch started!'); // Debugging line to confirm the stopwatch has started
+            startTime = Date.now() - seconds * 1000 - minutes * 60000; // Initialize start time
+            timer = setInterval(function () {
+                const elapsedTime = Date.now() - startTime;
+                seconds = Math.floor((elapsedTime / 1000) % 60);
+                minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+                updateTime();
+            }, 1000); // Update time every second
+            isRunning = true;
+            startStopButton.style.backgroundColor = "green"; // Change circle color to green when running
+        }
+    }
 
-function resetStopwatch() {
-    clearInterval(timer);
-    elapsedTime = 0;
-    display.textContent = '00:00.0';
-    startStopButton.textContent = 'Start';
-    isRunning = false;
-}
+    // Stop the stopwatch
+    function stopStopwatch() {
+        clearInterval(timer);
+        isRunning = false;
+        startStopButton.style.backgroundColor = "red"; // Change circle back to red when stopped
+        console.log('Stopwatch stopped!'); // Debugging line to confirm the stopwatch was stopped
+    }
+
+    // Toggle between start and stop on click
+    startStopButton.addEventListener('click', function () {
+        if (isRunning) {
+            stopStopwatch();  // Stop if running
+        } else {
+            startStopwatch(); // Start if stopped
+        }
+    });
+
+    // Automatically start the stopwatch after 5 seconds
+    setTimeout(function () {
+        console.log('5 seconds passed. Starting stopwatch...'); // Debugging line
+        startStopwatch(); // Start automatically after 5 seconds
+    }, 5000); // 5000 milliseconds = 5 seconds
+});
