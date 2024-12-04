@@ -1,62 +1,50 @@
-document.addEventListener("DOMContentLoaded", function () {
-    let timer;
-    let seconds = 0;
-    let minutes = 0;
-    let isRunning = false;
-    let startTime = null;
+// Get elements from the DOM
+let startStopButton = document.getElementById("startStopButton");
+let timeDisplay = document.getElementById("time-display");
 
-    // Select the elements for time display and the circle button
-    const timeDisplay = document.getElementById('time-display');
-    const startStopButton = document.getElementById('startStopButton');
+let isRunning = true;  // Start with the stopwatch running
+let timer;
+let seconds = 0;
+let minutes = 0;
 
-    // Function to format the time as MM:SS
-    function formatTime() {
-        const minutesFormatted = minutes < 10 ? '0' + minutes : minutes;
-        const secondsFormatted = seconds < 10 ? '0' + seconds : seconds;
-        return `${minutesFormatted}:${secondsFormatted}`;
-    }
+// Start the stopwatch immediately when the page loads
+window.onload = function() {
+    startStopwatch();  // Automatically start the stopwatch
+};
 
-    // Update time display on the page
-    function updateTime() {
-        timeDisplay.textContent = formatTime();
-    }
-
-    // Start the stopwatch
-    function startStopwatch() {
-        if (!isRunning) {
-            console.log('Stopwatch started!'); // Debugging line to confirm the stopwatch has started
-            startTime = Date.now() - seconds * 1000 - minutes * 60000; // Initialize start time
-            timer = setInterval(function () {
-                const elapsedTime = Date.now() - startTime;
-                seconds = Math.floor((elapsedTime / 1000) % 60);
-                minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
-                updateTime();
-            }, 1000); // Update time every second
-            isRunning = true;
-            startStopButton.style.backgroundColor = "green"; // Change circle color to green when running
-        }
-    }
-
-    // Stop the stopwatch
-    function stopStopwatch() {
+// Function to start/stop the stopwatch
+function startStopwatch() {
+    if (isRunning) {
+        // Start the stopwatch
+        timer = setInterval(updateTime, 1000);
+        startStopButton.style.backgroundColor = "red";  // Change circle color to indicate it's running
+    } else {
+        // Stop the stopwatch
         clearInterval(timer);
-        isRunning = false;
-        startStopButton.style.backgroundColor = "red"; // Change circle back to red when stopped
-        console.log('Stopwatch stopped!'); // Debugging line to confirm the stopwatch was stopped
+        startStopButton.style.backgroundColor = "green";  // Change circle color to indicate it's stopped
     }
 
-    // Toggle between start and stop on click
-    startStopButton.addEventListener('click', function () {
-        if (isRunning) {
-            stopStopwatch();  // Stop if running
-        } else {
-            startStopwatch(); // Start if stopped
-        }
-    });
+    isRunning = !isRunning;  // Toggle running state
+}
 
-    // Automatically start the stopwatch after 5 seconds
-    setTimeout(function () {
-        console.log('5 seconds passed. Starting stopwatch...'); // Debugging line
-        startStopwatch(); // Start automatically after 5 seconds
-    }, 5000); // 5000 milliseconds = 5 seconds
-});
+// Update the time
+function updateTime() {
+    seconds++;
+
+    if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+    }
+
+    timeDisplay.textContent = formatTime(minutes, seconds);
+}
+
+// Format time in MM:SS format
+function formatTime(minutes, seconds) {
+    let formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+    let formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
+    return `${formattedMinutes}:${formattedSeconds}`;
+}
+
+// Event listener for the circle button
+startStopButton.addEventListener("click", startStopwatch);
